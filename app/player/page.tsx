@@ -9,6 +9,7 @@ import { EpisodeList } from '@/components/player/EpisodeList';
 import { PlayerError } from '@/components/player/PlayerError';
 import { SourceInfo } from '@/components/player/EpisodeList';
 import type { VideoSource } from '@/lib/types';
+import type { VideoResolutionInfo } from '@/components/player/hooks/useVideoResolution';
 import { useVideoPlayer } from '@/lib/hooks/useVideoPlayer';
 import { useHistory } from '@/lib/store/history-store';
 import { FavoritesSidebar } from '@/components/favorites/FavoritesSidebar';
@@ -265,6 +266,9 @@ function PlayerContent() {
   const [currentSourceId, setCurrentSourceId] = useState(source);
   const playerTimeRef = useRef(0);
 
+  // Track detected video resolution from the player
+  const [detectedResolution, setDetectedResolution] = useState<VideoResolutionInfo | null>(null);
+
   // Add initial history entry when video data is loaded
   useEffect(() => {
     if (videoData && playUrl && videoId) {
@@ -363,6 +367,7 @@ function PlayerContent() {
                 videoTitle={videoData?.vod_name || title || ''}
                 episodeName={videoData?.episodes?.[currentEpisode]?.name || ''}
                 externalTimeRef={playerTimeRef}
+                onResolutionDetected={setDetectedResolution}
               />
               <div className="hidden lg:block">
                 <VideoMetadata
@@ -425,6 +430,7 @@ function PlayerContent() {
                     onToggleReverse={handleToggleReverse}
                     sources={groupedSources.length > 0 ? groupedSources : undefined}
                     currentSource={currentSourceId || source || ''}
+                    currentResolution={detectedResolution}
                     onSourceChange={(newSource) => {
                       const params = new URLSearchParams();
                       params.set('id', String(newSource.id));

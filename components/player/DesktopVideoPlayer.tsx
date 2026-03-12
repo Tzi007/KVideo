@@ -31,6 +31,8 @@ interface DesktopVideoPlayerProps {
   // Danmaku props
   videoTitle?: string;
   episodeName?: string;
+  // Resolution callback
+  onResolutionDetected?: (info: import('./hooks/useVideoResolution').VideoResolutionInfo) => void;
 }
 
 export function DesktopVideoPlayer({
@@ -46,6 +48,7 @@ export function DesktopVideoPlayer({
   isReversed = false,
   videoTitle = '',
   episodeName = '',
+  onResolutionDetected,
 }: DesktopVideoPlayerProps) {
   const { refs, data, actions } = useDesktopPlayerState();
   const { fullscreenType: settingsFullscreenType } = usePlayerSettings();
@@ -54,6 +57,13 @@ export function DesktopVideoPlayer({
 
   // Detect actual video resolution
   const videoResolution = useVideoResolution(refs.videoRef);
+
+  // Notify parent when resolution is detected
+  React.useEffect(() => {
+    if (videoResolution && onResolutionDetected) {
+      onResolutionDetected(videoResolution);
+    }
+  }, [videoResolution, onResolutionDetected]);
 
   // Danmaku
   const { danmakuEnabled, setDanmakuEnabled, comments: danmakuComments } = useDanmaku({
